@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handleSave(req, res) {
   if (req.method === "POST") {
     const { message } = req.body;
     if (!message) {
@@ -13,4 +13,4 @@ export default async function handler(req, res) {
   } else {
     res.status(405).end(); // Method Not Allowed
   }
-}
+};
