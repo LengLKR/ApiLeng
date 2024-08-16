@@ -1,7 +1,10 @@
 const express = require("express");
+const axios = require("axios");
 const app = express();
 const handleSave = require("./apiSaveMessage"); // เปลี่ยนชื่อไฟล์เป็น apiSaveMessage.js
 const cors = require("cors");
+const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+
 app.use(cors());
 
 app.use(express.json()); // เพื่อให้สามารถ parse JSON ใน body ของ request ได้
@@ -11,7 +14,7 @@ app.post("/api/saveMessage", (req, res) => {
 });
 app.post("/api/sendLineMessage", async (req, res) => {
   const { message, userId } = req.body; // รับ userId จาก body ของ request
-
+  console.log("Request Body:", req.body);
   if (!message || !userId) {
     // ตรวจสอบว่ามี message และ userId หรือไม่
     return res
@@ -34,7 +37,7 @@ app.post("/api/sendLineMessage", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
+          Authorization: `Bearer pGJXMK92+YhNxQ1pBFpk+RBwMAa4voF30YPb0NBST+hsu503dvNLLzkfRKLcG7gdFkbhLR2fqKX8q3WGX3nsbmVRTtgmPpRM1LqQk3n7R2+6WHO10oTbP65woC0oEEiUJpsMM6nQQG7Jou9FeIgr6wdB04t89/1O/w1cDnyilFU=`,
         },
       }
     );
