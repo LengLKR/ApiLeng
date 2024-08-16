@@ -1,14 +1,9 @@
 const express = require("express");
+const axios = require("axios");
 const app = express();
-const handleSave = require("./apiSaveMessage"); // เปลี่ยนชื่อไฟล์เป็น apiSaveMessage.js
-const cors = require("cors");
-app.use(cors());
+app.use(express.json());
 
-app.use(express.json()); // เพื่อให้สามารถ parse JSON ใน body ของ request ได้
-
-app.post("/api/saveMessage", (req, res) => {
-  handleSave(req, res);
-});
+const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 app.post("/api/sendLineMessage", async (req, res) => {
   const { message, userId } = req.body; // รับ userId จาก body ของ request
 
@@ -49,6 +44,7 @@ app.post("/api/sendLineMessage", async (req, res) => {
   }
 });
 
-app.listen(8888, () => {
-  console.log("Server is running on port 8888");
+const PORT = process.env.PORT || 8888;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
