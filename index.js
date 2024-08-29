@@ -8,7 +8,6 @@ const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 app.use(cors());
 
 app.use(express.json()); // เพื่อให้สามารถ parse JSON ใน body ของ request ได้
-
 app.post("/api/saveMessage", (req, res) => {
   handleSave(req, res);
 });
