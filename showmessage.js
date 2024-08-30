@@ -1,12 +1,22 @@
-// pages/api/messages.js
-const { db } = require('./firebaseconfig'); 
-const { collection, getDocs } = require('firebase/firestore');
+const {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+} = require("firebase/firestore");
+const { db } = require("./firebaseconfig");
 
-export default async function handleGetMessages(req, res) {
-  if (req.method === 'GET') {
+module.exports = async function handleGetMessages(req, res) {
+  if (req.method === "GET") {
     try {
-      // ดึงข้อมูลจากคอลเล็กชัน 'messages'
-      const querySnapshot = await getDocs(collection(db, 'messages'));
+      // สร้าง query เพื่อดึงข้อมูลจากคอลเล็กชัน 'messages' พร้อมกับเงื่อนไขและการจัดเรียง
+      const q = query(
+        collection(db, "messages"),
+        orderBy("createdAt", "desc") // จัดเรียงตาม createdAt จากมากไปน้อย
+      );
+
+      const querySnapshot = await getDocs(q);
       const messages = [];
       querySnapshot.forEach((doc) => {
         messages.push({ id: doc.id, ...doc.data() });
@@ -15,11 +25,11 @@ export default async function handleGetMessages(req, res) {
       // ส่งข้อมูลกลับเป็น JSON
       res.status(200).json(messages);
     } catch (e) {
-      console.error('Error getting documents: ', e);
-      res.status(500).json({ error: 'Failed to fetch messages' });
+      console.error("Error getting documents: ", e);
+      res.status(500).json({ error: "Failed to fetch messages" });
     }
   } else {
-    // Method Not Allowed
+    // Method Not Allowed สำหรับ method อื่นๆ
     res.status(405).end();
   }
-}
+};

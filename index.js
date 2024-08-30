@@ -2,14 +2,20 @@ const express = require("express");
 const axios = require("axios");
 const app = express();
 const handleSave = require("./apiSaveMessage"); // เปลี่ยนชื่อไฟล์เป็น apiSaveMessage.js
+const handleGetMessages = require("./showmessage"); // เปลี่ยนชื่อไฟล์เป็น apiSaveMessage.js
 const cors = require("cors");
 const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const line = require("@line/bot-sdk");
 app.use(cors());
 
 app.use(express.json()); // เพื่อให้สามารถ parse JSON ใน body ของ request ได้
 app.post("/api/saveMessage", (req, res) => {
   handleSave(req, res);
+});
+app.get("/api/messages", (req, res) => {
+  handleGetMessages(req, res);
 });
 app.post("/api/sendLineMessage", async (req, res) => {
   const { message, userId } = req.body; // รับ userId จาก body ของ request
