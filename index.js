@@ -1,37 +1,24 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+const cron = require("node-cron");
+const { getDocs, query, orderBy, collection } = require("firebase/firestore");
+const { db } = require("./firebaseconfig");
 
 // ตั้งค่าเซิร์ฟเวอร์
 const app = express();
 app.use(cors());
-app.use(express.json()); // เพื่อให้สามารถ parse JSON ใน body ของ request ได้
+app.use(express.json());
 
 // ตั้งค่า LINE CHANNEL ACCESS TOKEN
 const LINE_CHANNEL_ACCESS_TOKEN =
   "pGJXMK92+YhNxQ1pBFpk+RBwMAa4voF30YPb0NBST+hsu503dvNLLzkfRKLcG7gdFkbhLR2fqKX8q3WGX3nsbmVRTtgmPpRM1LqQk3n7R2+6WHO10oTbP65woC0oEEiUJpsMM6nQQG7Jou9FeIgr6wdB04t89/1O/w1cDnyilFU=";
-
-// ฟังก์ชันการจัดการเพื่อบันทึกข้อความ
-const handleSave = require("./apiSaveMessage"); // ต้องมีการสร้างไฟล์ apiSaveMessage.js เพื่อบันทึกข้อความ
-
-// ฟังก์ชันการจัดการเพื่อดึงข้อความที่บันทึกไว้
-const handleGetMessages = require("./showmessage"); // ต้องมีการสร้างไฟล์ showmessage.js เพื่อดึงข้อความที่บันทึกไว้
-const { getDocs, query, orderBy, collection } = require("firebase/firestore");
-const { db } = require("./firebaseconfig");
 
 // ฟังก์ชันสุ่มข้อความ
 function getRandomMessage(messages) {
   const randomIndex = Math.floor(Math.random() * messages.length);
   return messages[randomIndex];
 }
-
-// Endpoint สำหรับบันทึกข้อความ
-app.post("/api/saveMessage", (req, res) => {
-  handleSave(req, res);
-});
-app.get("/api/messages", (req, res) => {
-  handleGetMessages(req, res);
-});
 
 // Endpoint สำหรับดึงข้อความที่บันทึกไว้และส่งไปยัง LINE
 app.get("/api/sendtoline", async (req, res) => {
@@ -88,6 +75,18 @@ app.get("/api/sendtoline", async (req, res) => {
       .status(500)
       .send("Failed to broadcast random message via Line Chatbot.");
   }
+});
+
+// ตั้งเวลาส่งข้อความทุกๆ 7 โมงเช้าเวลาไทย
+cron.schedule("0 7 * * *", async () => {
+  try {
+    const response = await axios.get("http://localhost:8888/api/sendtoline");
+    console.log("Scheduled task: Message sent at 7:00 AM");
+  } catch (error) {
+    console.error("Scheduled task failed:", error);
+  }
+}, {
+  timezone: "Asia/Bangkok"
 });
 
 // เริ่มเซิร์ฟเวอร์
