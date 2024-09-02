@@ -19,7 +19,7 @@ module.exports = async function handleSave(req, res) {
 
       console.log("Document written with ID: ", docRef.id);
 
-      res.status(200).json({ success: true, id: docRef.id });
+      res.status(200).json({ success: true, id: docRef.id, text:message });
     } catch (e) {
       console.error("Error adding document: ", e);
       res.status(500).json({ error: "Failed to save message" });

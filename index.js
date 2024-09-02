@@ -25,9 +25,59 @@ function getRandomMessage(messages) {
 
 //ฟังก์ชั่นตรวจสอบคำหยาบ
 function containsProfanity(text) {
-  const profanityList = ["ควย", "หี", "ไอ้เหี้ย", "ไอ้สัตว์"]; // คำหยาบที่จะทำการตรวจสอบ
+  const profanityList = [
+    "ควย",
+    "หี",
+    "ไอเหี้ย",
+    "ไอสัตว์",
+    "ไอสัส",
+    "ควาย",
+    "เฮงซวย",
+    "อีตอแหล",
+    "ไอ้ระยำ",
+    "ไอ้ตัวแสบ",
+    "ผู้หญิงต่ำๆ",
+    "พระหน้าผี",
+    "อีดอก",
+    "อีดอกทอง",
+    "หมา",
+    "ไอเวร",
+    "มารศาสนา",
+    "ไอ้หน้าโง่",
+    "กระโหลก",
+    "อีสัส",
+  ];
+
   return profanityList.some((word) => text.includes(word));
 }
+
+// API ดึงข้อมูลจาก firebase และกรองคำหยาบ
+app.get("/api/messages", async (req, res) => {
+  try {
+    const q = query(
+      collection(db, "messages"),
+      orderBy("createdAt", "desc") // จัดเรียงตาม createdAt จากมากไปน้อย
+    );
+    const querySnapshot = await getDocs(q);
+    const filteredMessages = [];
+
+    querySnapshot.forEach((doc) => {
+      const message = doc.data().text;
+      if (!containsProfanity(message)) {
+        filteredMessages.push({ id: doc.id, text: message });
+      }
+    });
+
+    if (filteredMessages.length === 0) {
+      return res.status(404).send("No appropriate messages found.");
+    }
+
+    res.json(filteredMessages);
+  } catch (error) {
+    console.error("Error fetching messages from Firebase: ", error);
+    res.status(500).send("Failed to fetch messages.");
+  }
+});
 
 // Endpoint สำหรับการบันทึกข้อความ
 app.post("/api/saveMessage", handleSave);
@@ -98,7 +148,7 @@ app.get("/api/sendtoline", async (req, res) => {
 
 // ตั้งเวลาส่งข้อความทุกๆ 7 โมงเช้าเวลาไทย
 cron.schedule(
-  "06 11 * * *",
+  "0 7 * * *",
   async () => {
     try {
       const response = await axios.get("http://localhost:8888/api/sendtoline");
