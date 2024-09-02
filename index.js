@@ -98,7 +98,7 @@ app.get("/api/sendtoline", async (req, res) => {
 
 // ตั้งเวลาส่งข้อความทุกๆ 7 โมงเช้าเวลาไทย
 cron.schedule(
-  "0 7 * * *",
+  "06 11 * * *",
   async () => {
     try {
       const response = await axios.get("http://localhost:8888/api/sendtoline");
