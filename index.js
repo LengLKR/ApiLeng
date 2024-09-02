@@ -14,11 +14,23 @@ app.use(express.json());
 const LINE_CHANNEL_ACCESS_TOKEN =
   "pGJXMK92+YhNxQ1pBFpk+RBwMAa4voF30YPb0NBST+hsu503dvNLLzkfRKLcG7gdFkbhLR2fqKX8q3WGX3nsbmVRTtgmPpRM1LqQk3n7R2+6WHO10oTbP65woC0oEEiUJpsMM6nQQG7Jou9FeIgr6wdB04t89/1O/w1cDnyilFU=";
 
+//ฟังก์ชัน handleSave จาก apiSaveMessage.js
+const handleSave = require("./apiSaveMessage");
+
 // ฟังก์ชันสุ่มข้อความ
 function getRandomMessage(messages) {
   const randomIndex = Math.floor(Math.random() * messages.length);
   return messages[randomIndex];
 }
+
+//ฟังก์ชั่นตรวจสอบคำหยาบ
+function containsProfanity(text) {
+  const profanityList = ["ควย", "หี", "ไอ้เหี้ย", "ไอ้สัตว์"]; // คำหยาบที่จะทำการตรวจสอบ
+  return profanityList.some((word) => text.includes(word));
+}
+
+// Endpoint สำหรับการบันทึกข้อความ
+app.post("/api/saveMessage", handleSave);
 
 // Endpoint สำหรับดึงข้อความที่บันทึกไว้และส่งไปยัง LINE
 app.get("/api/sendtoline", async (req, res) => {
@@ -40,6 +52,13 @@ app.get("/api/sendtoline", async (req, res) => {
 
     // สุ่มเลือกข้อความจาก array messages
     const randomMessage = getRandomMessage(messages);
+
+    //ตรวจสอบคำหยาบในข้อความที่สุ่มเลือกมา
+    if (containsProfanity(randomMessage.text)) {
+      return res
+        .status(400)
+        .send("Message contains profanity and cannot be sent.");
+    }
 
     // ส่งข้อความที่ดึงมาไปยังผู้ใช้ทุกคนที่เป็นเพื่อนกับบอท LINE
     const lineMessages = [
@@ -78,16 +97,20 @@ app.get("/api/sendtoline", async (req, res) => {
 });
 
 // ตั้งเวลาส่งข้อความทุกๆ 7 โมงเช้าเวลาไทย
-cron.schedule("0 7 * * *", async () => {
-  try {
-    const response = await axios.get("http://localhost:8888/api/sendtoline");
-    console.log("Scheduled task: Message sent at 7:00 AM");
-  } catch (error) {
-    console.error("Scheduled task failed:", error);
+cron.schedule(
+  "0 7 * * *",
+  async () => {
+    try {
+      const response = await axios.get("http://localhost:8888/api/sendtoline");
+      console.log("Scheduled task: Message sent at 7:00 AM");
+    } catch (error) {
+      console.error("Scheduled task failed:", error);
+    }
+  },
+  {
+    timezone: "Asia/Bangkok",
   }
-}, {
-  timezone: "Asia/Bangkok"
-});
+);
 
 // เริ่มเซิร์ฟเวอร์
 app.listen(8888, () => {
