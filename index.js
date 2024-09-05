@@ -126,7 +126,7 @@ function containsProfanity(text) {
       "blowjob",
       "sod",
       "son of a bitch",
-      "ๆอสัส","แม่เยต","แม่เยส","ฆวย","ฃวย"
+      "ๆอสัส","แม่เยต","แม่เยส","ฆวย","ฃวย","ไอัสส"
   ];
 
   return profanityList.some((word) => text.includes(word));
