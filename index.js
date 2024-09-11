@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 const cron = require("node-cron");
-const { getDocs, query, orderBy, collection } = require("firebase/firestore");
+const { getDocs, query, orderBy, collection, where } = require("firebase/firestore");
 const { db } = require("./firebaseconfig");
 
 // ตั้งค่าเซิร์ฟเวอร์
@@ -133,12 +133,20 @@ function containsProfanity(text) {
 }
 
 // API ดึงข้อมูลจาก firebase และกรองคำหยาบ
-app.get("/api/messages", async (req, res) => {
+app.post("/api/messages", async (req, res) => {
+  const { email } = req.body; // ดึง email จาก body ของคำขอ
   try {
+    if (!email) {
+      return res.status(400).send("Email is required.");
+    }
+
+    // สร้าง query เพื่อดึงข้อความที่ตรงกับ email
     const q = query(
       collection(db, "messages"),
+      where("email", "==", email), // กรองเอกสารที่มี email ตรงกัน
       orderBy("createdAt", "desc") // จัดเรียงตาม createdAt จากมากไปน้อย
     );
+
     const querySnapshot = await getDocs(q);
     const filteredMessages = [];
 
@@ -195,7 +203,8 @@ app.get("/api/sendtoline", async (req, res) => {
     const lineMessages = [
       {
         type: "text",
-        text: randomMessage.text, // ส่งข้อความที่สุ่มเลือกไปยัง LINE
+        text: `${randomMessage.nickName} \n${randomMessage.text}`
+        // text: randomMessage.text, // ส่งข้อความที่สุ่มเลือกไปยัง LINE
       },
     ];
 
@@ -229,7 +238,7 @@ app.get("/api/sendtoline", async (req, res) => {
 
 // ตั้งเวลาส่งข้อความทุกๆ 7 โมงเช้าเวลาไทย
 cron.schedule(
-  "0 7 * * *",
+  "54 23 * * *",
   async () => {
     try {
       const response = await axios.get("http://localhost:8888/api/sendtoline");
