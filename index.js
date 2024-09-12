@@ -203,7 +203,7 @@ app.get("/api/sendtoline", async (req, res) => {
     const lineMessages = [
       {
         type: "text",
-        text: `${randomMessage.nickName} \n${randomMessage.text}`
+        text: `✏${randomMessage.nickName} \n${randomMessage.text}`
         // text: randomMessage.text, // ส่งข้อความที่สุ่มเลือกไปยัง LINE
       },
     ];
@@ -238,7 +238,7 @@ app.get("/api/sendtoline", async (req, res) => {
 
 // ตั้งเวลาส่งข้อความทุกๆ 7 โมงเช้าเวลาไทย
 cron.schedule(
-  "54 23 * * *",
+  "3 13 * * *",
   async () => {
     try {
       const response = await axios.get("http://localhost:8888/api/sendtoline");
@@ -251,7 +251,16 @@ cron.schedule(
     timezone: "Asia/Bangkok",
   }
 );
+// const intervalInSeconds = 10;
 
+// setInterval(async () => {
+//   try {
+//     const response = await axios.get("http://localhost:8888/api/sendtoline");
+//     console.log("Scheduled task: Message sent");
+//   } catch (error) {
+//     console.error("Scheduled task failed:", error);
+//   }
+// }, intervalInSeconds * 500);
 // เริ่มเซิร์ฟเวอร์
 app.listen(8888, () => {
   console.log("Server is running on port 8888");

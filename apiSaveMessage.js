@@ -15,7 +15,7 @@ module.exports = async function handleSave(req, res) {
       const docRef = await addDoc(collection(db, "messages"), {
         text: message,
         email:email,
-        nickName:nickName || " ",
+        nickName:nickName,
         createdAt: new Date(),
       });
 
