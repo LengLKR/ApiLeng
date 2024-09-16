@@ -3,7 +3,7 @@ const { collection, addDoc } = require('firebase/firestore');
 
 module.exports = async function handleSave(req, res) {
   if (req.method === "POST") {
-    const { message,email,nickName } = req.body;
+    const { message, email, nickName } = req.body;
 
     if (!message) {
       res.status(400).json({ error: "Message is required" });
@@ -11,17 +11,20 @@ module.exports = async function handleSave(req, res) {
     }
 
     try {
+      // ตรวจสอบว่า nickName มีค่าหรือไม่ ถ้าไม่มีให้กำหนดค่าเริ่มต้น
+      const safeNickName = nickName || "";
+
       // Logic สำหรับบันทึกข้อความไปยัง Firestore
       const docRef = await addDoc(collection(db, "messages"), {
         text: message,
-        email:email,
-        nickName:nickName,
+        email: email,
+        nickName: safeNickName,
         createdAt: new Date(),
       });
 
       console.log("Document written with ID: ", docRef.id);
 
-      res.status(200).json({ success: true, id: docRef.id, text:message,email:email,nickName:nickName });
+      res.status(200).json({ success: true, id: docRef.id, text: message, email: email, nickName: safeNickName });
     } catch (e) {
       console.error("Error adding document: ", e);
       res.status(500).json({ error: "Failed to save message" });
