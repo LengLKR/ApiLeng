@@ -11,10 +11,10 @@ module.exports = async function handleSave(req, res) {
     }
 
     try {
-      // ตรวจสอบว่า nickName มีค่าหรือไม่ ถ้าไม่มีให้กำหนดค่าเริ่มต้น
+      
       const safeNickName = nickName || "";
 
-      // Logic สำหรับบันทึกข้อความไปยัง Firestore
+      
       const docRef = await addDoc(collection(db, "messages"), {
         text: message,
         email: email,
